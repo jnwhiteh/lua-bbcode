@@ -6,9 +6,11 @@ general, however getting it to a working state for the following tags is my
 priority:
 
 Block level tags:
+
   * [quote]
 
 Inline tags:
+
   * [b]
   * [i]
   * [u]
