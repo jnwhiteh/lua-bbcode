@@ -18,6 +18,7 @@ local tag_alternative_names = {
     -- Alternative name -> Cononical name
     bold = b,
     underline = u,
+    italics = i,
 }
 
 local tags_open = {
