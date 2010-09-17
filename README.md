@@ -11,9 +11,9 @@ Block level tags:
 
 Inline tags:
 
-  * [b]
-  * [i]
-  * [u]
+  * [b] - IMPLEMENTED
+  * [i] - IMPLEMENTED
+  * [u] - IMPLEMENTED
   * [s]
   * [url]
   * [url=http://www.example.com]
