@@ -1,5 +1,10 @@
 require("lpeg")
 
+local bbcode = {}
+bbcode._NAME = "bbcode"
+bbcode._M = bbcode
+bbcode._PACKAGE = "bbcode"
+
 local v = lpeg.V
 local c = lpeg.C
 local carg = lpeg.Carg
@@ -68,8 +73,8 @@ local function process_tag(pending, is_closing, tag)
     return text
 end
 
-grammar = {
-    "btag";
+bbcode.grammar = {
+    "message";
     lb = p("["),
     rb = p("]"),
     slash = p("/"),
@@ -82,43 +87,9 @@ grammar = {
     message = (v"textortags")^1,
 }
 
-local pass = 0
-local fail = 0
-
-local htmifyTests = {
-    -- Bold
-    {"message", "[b]foo[/b]", [[<span style="font-weight: bold;">foo</span>]], true},
-    {"message", "[b]foo[/b]", [[]], false},
-    -- Italics
-    {"message", "[i]foo[/i]", [[<span style="font-style: italic;">foo</span>]], true},
-    {"message", "[i]foo[/i]", [[]], false},
-    -- Underline
-    {"message", "[u]foo[/u]", [[<span style="text-decoration: underline;">foo</span>]], true},
-    {"message", "[u]foo[/u]", [[]], false},
-    -- Code
-    {"message", "[code]foo = 14[/code]", [[<code>foo = 14</code>]], true},
-    -- Nesting
-    {"message", "[b][i][u]foo[/u][/i][/b]", [[<span style="font-weight: bold;"><span style="font-style: italic;"><span style="text-decoration: underline;">foo</span></span></span>]], true},
-
-    -- Bad nesting
-    {"message", "[b][i]foo[/b][/i]", [[<span style="font-weight: bold;"><span style="font-style: italic;">foo</span></span>]], true},
-    {"message", "[b][i][u]foo[/i] monkey[/b][/u]", [[<span style="font-weight: bold;"><span style="font-style: italic;"><span style="text-decoration: underline;">foo</span></span> monkey</span>]], true},
-    {"message", "[b][u][i]foo[/b][/i] foo [/u]", [[<span style="font-weight: bold;"><span style="text-decoration: underline;"><span style="font-style: italic;">foo</span></span></span> foo ]], true},
-}
-
-function test_htmlify()
-    print(string.rep("=", 65))
-    for i = 1, #htmifyTests, 1 do
-        local test = htmifyTests[i]
-        grammar[1] = test[1]
-        local result = lpeg.Cs(grammar):match(test[2], 1, {})
-        local success = (result == test[3]) == test[4]
-        if success then pass = pass + 1 else fail = fail + 1 end
-        local stext = success and "PASS" or "*** FAIL"
-        print(string.format("Testing %s\t => %s [Result: '%s']", test[1], stext, tostring(result)))
-    end
+function bbcode.htmlify(str)
+    return lpeg.Cs(bbcode.grammar):match(str, 1, {})
 end
 
-test_htmlify()
-
-print(string.format("\n*** %d tests PASS, %d tests FAIL", pass, fail))
+package.loaded[bbcode._NAME] = bbcode
+return bbcode
