@@ -106,9 +106,20 @@ bbcode.grammar = {
     text = (v"char")^1,
     newline = p("\n") / function(tag) return "<br/>\n" end,
     alpha = r("az", "AZ"),
+    
+    squote = p("'"),
+    dquote = p("\""),
+
+    noclose = v"char" - v"rb",
+
+    dquotparam = v"dquote" * c((v"noclose" - v"dquote")^1) * v"dquote",
+    squotparam = v"squote" * c((v"noclose" - v"squote")^1) * v"squote",
+
+    noquoparam = c((v"noclose")^1),
+    param = v"dquotparam" + v"squotparam" + v"noquoparam",
 
     id_simple = (v"alpha" - v"rb")^1,
-    id_complex = (c(v"alpha"^1) * p"=" * c((v"char" - v"rb")^1)),
+    id_complex = (c(v"alpha"^1) * p"=" * v"param"),
 
     tag = v"lb" * carg(1) * c(v"slash"^-1) * (lpeg.Ct(v"id_complex") + c(v"id_simple")) * v"rb" / process_tag,
 

@@ -15,8 +15,18 @@ local tests = {
     {"Bad nesting 3", "[b][u][i]foo[/b][/i] foo [/u]", [[<span style="font-weight: bold;"><span style="text-decoration: underline;"><span style="font-style: italic;">foo</span></span></span> foo ]]},
     {"Simple newlines", "First line\nSecond line\nThird line", "First line<br/>\nSecond line<br/>\nThird line"},
     {"Simple URL", [=[[url=foo]WowProgramming[/url]]=], [[<a href="foo">WowProgramming</a>]]},
-    {"Real URL", [=[[url=http://wowprogramming.com]WowProgramming[/url]]=], [[<a href="http://wowprogramming.com">WowProgramming</a>]]},
-    {"Quoted URL", [=[[url="http://wowprogramming.com"]WowProgramming[/url]]=], [[<a href="http://wowprogramming.com">WowProgramming</a>]]},
+    {"Real URL", 
+        [=[[url=http://wowprogramming.com]WowProgramming[/url]]=],
+        [[<a href="http://wowprogramming.com">WowProgramming</a>]]
+    },
+    {"Double Quoted URL", 
+        [=[[url="http://wowprogramming.com"]WowProgramming[/url]]=],
+        [[<a href="http://wowprogramming.com">WowProgramming</a>]]
+    },
+    {"Single Quoted URL", 
+        [=[[url='http://wowprogramming.com']WowProgramming[/url]]=],
+        [[<a href="http://wowprogramming.com">WowProgramming</a>]]
+    },
 }
 
 for idx, entry in ipairs(tests) do
