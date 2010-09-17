@@ -14,6 +14,10 @@ local s = lpeg.S
 
 local locale = lpeg.locale(lpeg)
 
+local function id(str)
+    return str
+end
+
 local tag_alternative_names = {
     -- Alternative name -> Cononical name
     bold = b,
@@ -22,34 +26,45 @@ local tag_alternative_names = {
 }
 
 local tags_open = {
-    inline = {
-        b = [[<span style="font-weight: bold;">]],
-        i = [[<span style="font-style: italic;">]],
-        u = [[<span style="text-decoration: underline;">]],
-        s = [[<span style="text-decoration: line-through;">]],
-        code = [[<code>]],
+    b = [[<span style="font-weight: bold;">]],
+    i = [[<span style="font-style: italic;">]],
+    u = [[<span style="text-decoration: underline;">]],
+    s = [[<span style="text-decoration: line-through;">]],
+    code = [[<code>]],
+    url = {
+        format = [[<a href="%s">]],
+        param_func = function(str)
+            return str
+        end,
     },
 }
 
 local tags_close = {
-    inline = {
-        b = [[</span>]],
-        i = [[</span>]],
-        u = [[</span>]],
-        s = [[</span>]],
-        code = [[</code>]],
-    }
+    b = [[</span>]],
+    i = [[</span>]],
+    u = [[</span>]],
+    s = [[</span>]],
+    code = [[</code>]],
+    url = [[</a>]],
 }
 
 local tags = setmetatable({}, {__index = function(t, k)
-    return tags_open.inline
+    return tags_open[k]
 end})
 
 local function process_tag(pending, is_closing, tag)
     is_closing = is_closing ~= ""
+
+    -- Handle advanced tags, with tag=param
+    local param
+    if type(tag) == "table" then
+        tag, param = unpack(tag)
+    end
+
     -- Normalise tag name
     local tag_name = tag:lower()
     tag_name = tag_alternative_names[tag_name] or tag_name
+
     -- Do nothing to unrecognised tags
     if not tags[tag_name] then
         return tag
@@ -57,7 +72,14 @@ local function process_tag(pending, is_closing, tag)
     -- Open tags become HTML
     if not is_closing then
         pending[#pending + 1] = tag_name
-        return tags_open.inline[tag_name]
+
+        -- Handle advanced tags, with tag=param
+        if type(tags_open[tag_name]) == "table" then
+            local entry = tags_open[tag_name]
+            return string.format(entry.format, entry.param_func(param))
+        end
+            
+        return tags_open[tag_name]
     end
 
     local text = ""
@@ -68,7 +90,7 @@ local function process_tag(pending, is_closing, tag)
         if ptag == nil then
             break
         end
-        text = text .. tags_close.inline[tag_name] 
+        text = text .. tags_close[tag_name] 
         pending[#pending] = nil
     until ptag == tag_name
     return text
@@ -80,11 +102,17 @@ bbcode.grammar = {
     rb = p("]"),
     slash = p("/"),
     char = lpeg.print,
+    space = p(" "),
     text = (v"char")^1,
+    newline = p("\n") / function(tag) return "<br/>\n" end,
+    alpha = r("az", "AZ"),
 
-    tag = v"lb" * carg(1) * c(v"slash"^-1) * c((r("az","AZ") - v"rb")^1) * v"rb" / process_tag,
+    id_simple = (v"alpha" - v"rb")^1,
+    id_complex = (c(v"alpha"^1) * p"=" * c((v"char" - v"rb")^1)),
 
-    textortags = v"tag" + v"char",
+    tag = v"lb" * carg(1) * c(v"slash"^-1) * (lpeg.Ct(v"id_complex") + c(v"id_simple")) * v"rb" / process_tag,
+
+    textortags = v"tag" + v"char" + v"newline",
     message = (v"textortags")^1,
 }
 
