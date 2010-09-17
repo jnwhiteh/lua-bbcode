@@ -19,14 +19,19 @@ local tests = {
         [=[[url=http://wowprogramming.com]WowProgramming[/url]]=],
         [[<a href="http://wowprogramming.com">WowProgramming</a>]]
     },
-    {"Double Quoted URL", 
+    {"Double quoted URL", 
         [=[[url="http://wowprogramming.com"]WowProgramming[/url]]=],
         [[<a href="http://wowprogramming.com">WowProgramming</a>]]
     },
-    {"Single Quoted URL", 
+    {"Single quoted URL", 
         [=[[url='http://wowprogramming.com']WowProgramming[/url]]=],
         [[<a href="http://wowprogramming.com">WowProgramming</a>]]
     },
+    {"Badly single quoted URL", [=[[url=foo'bar]]=], [=[[url=foo'bar]]=]},
+    {"Badly double quoted URL", [=[[url=foo"bar]]=], [=[[url=foo"bar]]=]},
+    {"Unquoted email", [=[[email=me@jnwhiteh.net]Email me![/email]]=], [=[<a href="mailto:me@jnwhiteh.net">Email me!</a>]=]},
+    {"Single quoted email", [=[[email='me@jnwhiteh.net']Email me![/email]]=], [=[<a href="mailto:me@jnwhiteh.net">Email me!</a>]=]},
+    {"Double quoted email", [=[[email="me@jnwhiteh.net"]Email me![/email]]=], [=[<a href="mailto:me@jnwhiteh.net">Email me!</a>]=]},
 }
 
 for idx, entry in ipairs(tests) do

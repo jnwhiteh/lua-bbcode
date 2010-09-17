@@ -33,9 +33,11 @@ local tags_open = {
     code = [[<code>]],
     url = {
         format = [[<a href="%s">]],
-        param_func = function(str)
-            return str
-        end,
+        param_func = id,
+    },
+    email = {
+        format = [[<a href="mailto:%s">]],
+        param_func = id,
     },
 }
 
@@ -46,6 +48,7 @@ local tags_close = {
     s = [[</span>]],
     code = [[</code>]],
     url = [[</a>]],
+    email = [[</a>]],
 }
 
 local tags = setmetatable({}, {__index = function(t, k)
@@ -112,10 +115,10 @@ bbcode.grammar = {
 
     noclose = v"char" - v"rb",
 
-    dquotparam = v"dquote" * c((v"noclose" - v"dquote")^1) * v"dquote",
-    squotparam = v"squote" * c((v"noclose" - v"squote")^1) * v"squote",
+    dquotparam = v"dquote" * c((v"noclose" - v"squote" - v"dquote")^1) * v"dquote",
+    squotparam = v"squote" * c((v"noclose" - v"squote" - v"dquote")^1) * v"squote",
 
-    noquoparam = c((v"noclose")^1),
+    noquoparam = c((v"noclose" - v"dquote" - v"squote")^1),
     param = v"dquotparam" + v"squotparam" + v"noquoparam",
 
     id_simple = (v"alpha" - v"rb")^1,
