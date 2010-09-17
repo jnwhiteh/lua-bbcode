@@ -22,3 +22,7 @@ Inline tags:
   * [code]
 
 If you are interested in contributing to this project, please contact me.
+
+# Credits
+
+Thanks for Peter Cawley for his help with refactoring the LPEG grammar.
