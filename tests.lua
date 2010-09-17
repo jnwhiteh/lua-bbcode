@@ -32,6 +32,7 @@ local tests = {
     {"Unquoted email", [=[[email=me@jnwhiteh.net]Email me![/email]]=], [=[<a href="mailto:me@jnwhiteh.net">Email me!</a>]=]},
     {"Single quoted email", [=[[email='me@jnwhiteh.net']Email me![/email]]=], [=[<a href="mailto:me@jnwhiteh.net">Email me!</a>]=]},
     {"Double quoted email", [=[[email="me@jnwhiteh.net"]Email me![/email]]=], [=[<a href="mailto:me@jnwhiteh.net">Email me!</a>]=]},
+    {"Image", [=[[img]foo.png[/img]]=], [=[<img src="foo.png"/>]=]},
 }
 
 for idx, entry in ipairs(tests) do

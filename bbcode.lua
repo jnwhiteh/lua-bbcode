@@ -99,6 +99,10 @@ local function process_tag(pending, is_closing, tag)
     return text
 end
 
+local function process_image_tag(tag_name, pending, src)
+    return string.format([[<img src="%s"/>]], src)
+end
+
 bbcode.grammar = {
     "message";
     lb = p("["),
@@ -124,9 +128,11 @@ bbcode.grammar = {
     id_simple = (v"alpha" - v"rb")^1,
     id_complex = (c(v"alpha"^1) * p"=" * v"param"),
 
+    image_tag = v"lb" * carg(1) * c(p"img" + p"IMG") * v"rb" * c((v"char" - s"[]")^1) * v"lb" * (p"/img" + p"/IMG") * v"rb" / process_image_tag, 
+
     tag = v"lb" * carg(1) * c(v"slash"^-1) * (lpeg.Ct(v"id_complex") + c(v"id_simple")) * v"rb" / process_tag,
 
-    textortags = v"tag" + v"char" + v"newline",
+    textortags = v"image_tag" + v"tag" + v"char" + v"newline",
     message = (v"textortags")^1,
 }
 
