@@ -38,6 +38,7 @@ local tests = {
     {"Unordered list", [=[[list][*]Monkey[*]Banana[*]Peanut[/list]]=], [=[<ul><li>Monkey</li><li>Banana</li><li>Peanut</li></ul>]=]},
     {"Nested unordered list", [=[[list][*]Alpha[*]Beta[list][*]Gamma[*]Delta[/list][/list]]=], [=[<ul><li>Alpha</li><li>Beta</li><ul><li>Gamma</li><li>Delta</li></ul></ul>]=]},
     {"Nested ordered list", [=[[list=1][*]Alpha[*]Beta[list=3][*]Gamma[*]Delta[/list][/list]]=], [=[<ol start="1"><li>Alpha</li><li>Beta</li><ol start="3"><li>Gamma</li><li>Delta</li></ol></ol>]=]},
+    {"Simple quote", "[quote]This is a quote[/quote]", "<blockquote>This is a quote</blockquote>"},
 }
 
 for idx, entry in ipairs(tests) do

@@ -31,6 +31,7 @@ local tags_open = {
     u = [[<span style="text-decoration: underline;">]],
     s = [[<span style="text-decoration: line-through;">]],
     code = [[<code>]],
+    quote = [[<blockquote>]],
     url = {
         format = [[<a href="%s">]],
         param_func = id,
@@ -59,6 +60,7 @@ local tags_close = {
     email = [[</a>]],
     ol = [[</ol>]],
     ul = [[</ul>]],
+    quote = [[</blockquote>]],
 }
 
 local tags = setmetatable({}, {__index = function(t, k)
