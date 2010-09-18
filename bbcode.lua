@@ -39,6 +39,14 @@ local tags_open = {
         format = [[<a href="mailto:%s">]],
         param_func = id,
     },
+    list = function(tag, param)
+        if param then
+            local start = tonumber(param) or 1
+            return string.format([[<ol start="%d">]], start), "ol"     
+        else
+            return string.format([[<ul>]]), "ul"
+        end
+    end,
 }
 
 local tags_close = {
@@ -49,6 +57,8 @@ local tags_close = {
     code = [[</code>]],
     url = [[</a>]],
     email = [[</a>]],
+    ol = [[</ol>]],
+    ul = [[</ul>]],
 }
 
 local tags = setmetatable({}, {__index = function(t, k)
@@ -74,15 +84,20 @@ local function process_tag(pending, is_closing, tag)
     end
     -- Open tags become HTML
     if not is_closing then
-        pending[#pending + 1] = tag_name
+        local result, new_tag
 
         -- Handle advanced tags, with tag=param
-        if type(tags_open[tag_name]) == "table" then
-            local entry = tags_open[tag_name]
-            return string.format(entry.format, entry.param_func(param))
+        local open = tags_open[tag_name]
+        if type(open) == "table" then
+            result = string.format(open.format, open.param_func(param))
+        elseif type(open) == "function" then 
+            result, new_tag = open(tag, param)
+        else
+            result = tags_open[tag_name]
         end
             
-        return tags_open[tag_name]
+        pending[#pending + 1] = new_tag and {old = ta_name, new = new_tag} or tag_name
+        return result
     end
 
     local text = ""
@@ -93,7 +108,14 @@ local function process_tag(pending, is_closing, tag)
         if ptag == nil then
             break
         end
-        text = text .. tags_close[tag_name] 
+
+        if type(ptag) == "table" then
+            text = text .. tags_close[ptag.new]
+            ptag = ptag.old
+        else
+            text = text .. tags_close[ptag]
+        end
+
         pending[#pending] = nil
     until ptag == tag_name
     return text
@@ -103,12 +125,17 @@ local function process_image_tag(tag_name, pending, src)
     return string.format([[<img src="%s"/>]], src)
 end
 
+local function process_item_tag(pending, tag_name, content)
+    return string.format([[<li>%s</li>]], content)
+end
+
 bbcode.grammar = {
     "message";
     lb = p("["),
     rb = p("]"),
     slash = p("/"),
     char = lpeg.print,
+    digit = lpeg.digit,
     space = p(" "),
     text = (v"char")^1,
     newline = p("\n") / function(tag) return "<br/>\n" end,
@@ -130,9 +157,11 @@ bbcode.grammar = {
 
     image_tag = v"lb" * carg(1) * c(p"img" + p"IMG") * v"rb" * c((v"char" - s"[]")^1) * v"lb" * (p"/img" + p"/IMG") * v"rb" / process_image_tag, 
 
+    item_tag = v"lb" * carg(1) * c(p"*") * v"rb" * c((v"char" - s"[]")^1) / process_item_tag,
+
     tag = v"lb" * carg(1) * c(v"slash"^-1) * (lpeg.Ct(v"id_complex") + c(v"id_simple")) * v"rb" / process_tag,
 
-    textortags = v"image_tag" + v"tag" + v"char" + v"newline",
+    textortags = v"item_tag" + v"image_tag" + v"tag" + v"char" + v"newline",
     message = (v"textortags")^1,
 }
 

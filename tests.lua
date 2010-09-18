@@ -33,6 +33,11 @@ local tests = {
     {"Single quoted email", [=[[email='me@jnwhiteh.net']Email me![/email]]=], [=[<a href="mailto:me@jnwhiteh.net">Email me!</a>]=]},
     {"Double quoted email", [=[[email="me@jnwhiteh.net"]Email me![/email]]=], [=[<a href="mailto:me@jnwhiteh.net">Email me!</a>]=]},
     {"Image", [=[[img]foo.png[/img]]=], [=[<img src="foo.png"/>]=]},
+    {"Ordered list", [=[[list=1][*]Alpha[*]Beta[*]Gamma[/list]]=], [=[<ol start="1"><li>Alpha</li><li>Beta</li><li>Gamma</li></ol>]=]},
+    {"Ordered list with start", [=[[list=3][*]Delta[*]Epsilon[/list]]=], [=[<ol start="3"><li>Delta</li><li>Epsilon</li></ol>]=]},
+    {"Unordered list", [=[[list][*]Monkey[*]Banana[*]Peanut[/list]]=], [=[<ul><li>Monkey</li><li>Banana</li><li>Peanut</li></ul>]=]},
+    {"Nested unordered list", [=[[list][*]Alpha[*]Beta[list][*]Gamma[*]Delta[/list][/list]]=], [=[<ul><li>Alpha</li><li>Beta</li><ul><li>Gamma</li><li>Delta</li></ul></ul>]=]},
+    {"Nested ordered list", [=[[list=1][*]Alpha[*]Beta[list=3][*]Gamma[*]Delta[/list][/list]]=], [=[<ol start="1"><li>Alpha</li><li>Beta</li><ol start="3"><li>Gamma</li><li>Delta</li></ol></ol>]=]},
 }
 
 for idx, entry in ipairs(tests) do
